@@ -36,10 +36,34 @@
 | cliente | TCP efêmero | `→ servidor:9990` | sessão de controle |
 | cliente | TCP efêmero | `→ par:<porta>` | saída do P2P; identifica-se com `OI <nick>` |
 
-O número de porta do cliente pode ser o mesmo nas duas famílias (TCP e UDP são espaços de porta
-independentes). Por padrão usa-se `bind(("0.0.0.0", 0))` e a porta real é descoberta com
-`getsockname()` e anunciada no `REG`; `--porta 5001` fixa o valor para quem quiser digitar à mão
-durante a apresentação.
+### As quatro portas de um cliente (e por que não são a mesma)
+
+Confundir essas quatro é o erro clássico de quem lê o código rápido. Nenhuma delas é "atribuída pelo
+servidor": o servidor tem **uma** porta fixa (9990, TCP e UDP) e o cliente cuida das suas.
+
+| # | Porta | Quem escolhe | Aparece em | Para que serve |
+|---|---|---|---|---|
+| 1 | **porta de escuta** (ex.: 37757) | o SO, no `bind(("0.0.0.0", 0))` do cliente | `REG <nick> <porta>` e nas linhas `CONTATO` do `LIST` | é o endereço que os outros clientes usam para abrir o P2P — escuta TCP e UDP no mesmo número |
+| 2 | **origem da sessão de controle** (ex.: 40710) | o SO, na hora do `connect()` ao servidor | só no `ss`, nunca no protocolo | identificar a conexão de controle; morre quando o cliente sai |
+| 3 | **origem do datagrama de grupo** | — é a porta **1**, de propósito | `(ip, porta)` de origem do `BC` | o servidor valida o remetente comparando com o endpoint registrado; se o `BC` saísse de outro socket, a validação falharia |
+| 4 | **origem da conexão P2P de saída** (ex.: 49502) | o SO, no `connect()` ao par | só no `ss` | a conversa é do par, e o destino é a porta **1** do outro lado |
+
+O ponto que mais confunde: a porta **1** é a única divulgada. As portas 2 e 4 são efêmeras, uma por
+conexão, e não servem para ninguém discar — por isso o `REG` precisa da porta de escuta declarada: o
+servidor não tem como deduzi-la (o `getpeername()` dele mostra a porta 2, não a 1).
+
+Captura real de um cliente com `ss -tunap` (mesmo processo, quatro sockets):
+
+```
+tcp LISTEN  0.0.0.0:37757      0.0.0.0:*        ← (1) escuta TCP do P2P
+udp UNCONN  0.0.0.0:37757      0.0.0.0:*        ← (1) escuta UDP do grupo
+tcp ESTAB   127.0.0.1:40710    127.0.0.1:9990   ← (2) sessão de controle
+tcp ESTAB   127.0.0.1:49502    127.0.0.1:39047  ← (4) P2P de saída → porta (1) do par
+```
+
+Com `--porta 5001` a porta 1 passa a ser fixa (útil para liberar firewall e para digitar à mão na
+apresentação); sem a opção, é efêmera e anunciada no `REG`, o que permite vários clientes na mesma
+máquina sem colidir.
 
 ## 2. Threads por processo
 
