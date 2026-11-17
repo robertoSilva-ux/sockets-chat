@@ -258,6 +258,30 @@ def test_queda_abrupta_de_cliente():
         assert "Traceback" not in srv.log(), "servidor imprimiu traceback:\n%s" % srv.log()
 
 
+def test_listar_depois_de_ociosidade():
+    """Silêncio não pode derrubar a sessão: 8 s parado e o /listar ainda responde.
+
+    Regressão real: `registrar()` deixava `settimeout(6)` grudado no socket de controle; a
+    thread de leitura estourava aos 6 s de silêncio e o cliente anunciava "conexão encerrada"
+    com o servidor perfeitamente vivo.
+    """
+    with Servidor() as srv:
+        ana = ClienteProc("ana", srv.porta)
+        bruno = ClienteProc("bruno", srv.porta)
+        ana.exigir("[+] bruno entrou")
+        time.sleep(8.0)
+        assert "conexão com o servidor foi encerrada" not in ana.saida(), \
+            "cliente achou que a conexão caiu durante o silêncio:\n%s" % ana.saida()
+        ana.digitar("/listar")
+        ana.exigir("[lista] 2 contato(s)")
+        ana.exigir("bruno")
+        # e o caminho de fundo continua vivo: bruno saindo chega em ana
+        bruno.fechar()
+        ana.exigir("[-] bruno saiu")
+        ana.sem_traceback()
+        ana.fechar()
+
+
 def test_servidor_encerra_avisa_cliente():
     with Servidor() as srv:
         ana = ClienteProc("ana", srv.porta)

@@ -54,6 +54,18 @@ durante a apresentação.
 | cliente | listener TCP | `accept()` | aceita P2P entrante → delega a uma thread de conversa |
 | cliente | conversa P2P | `recv()` do par | recebe e imprime as mensagens do par |
 
+**Duas regras de I/O que o código respeita e valem explicar:**
+
+1. **Timeout é por chamada, não do socket.** `LeitorLinhas.linha(timeout)` reaplica o `settimeout`
+   sempre — inclusive para bloqueante (`None`). Um timeout esquecido no socket faz o primeiro silêncio
+   de N segundos virar `socket.timeout` na leitura de fundo, e a thread de controle anuncia "conexão
+   encerrada" com o servidor vivo. `socket.timeout` **é** `OSError`: quem trata `OSError` como fim de
+   conexão precisa separar os dois casos.
+2. **Escrita serializada por conexão.** Duas threads escrevem no mesmo socket de controle (a sessão
+   dona respondendo `LIST` e outra sessão empurrando `EVENTO`); sem uma trava no envio, uma linha
+   entra no meio da outra e o cliente lê lixo. A trava mora na `Conexao` (`protocolo.py`), junto com
+   a montagem da linha.
+
 **Ponto crítico único:** a lista de contatos do servidor (`dict` + `Lock`). O broadcast copia a lista
 (`list(contatos.values())`) dentro do lock e envia fora dele — enviar segurando o lock faria um cliente
 lento travar o registro dos outros.

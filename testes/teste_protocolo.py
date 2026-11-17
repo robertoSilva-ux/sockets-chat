@@ -303,6 +303,50 @@ def test_linha_longa():
         a.fechar()
 
 
+
+def test_list_nao_corrompe_linha():
+    """LIST concorrente com ENTROU/SAIU de outro cliente não pode quebrar a linha.
+
+    O servidor escreve na mesma conexão de controle a partir de duas threads: a sessão do
+    próprio cliente (resposta do LIST) e a sessão de outro cliente (evento ENTROU/SAIU).
+    Sem serialização, as escritas intercalam no meio de uma linha e o cliente lê lixo.
+    """
+    with Servidor() as srv:
+        ana = Cliente(srv.porta)
+        ana.registra("ana")
+        bruno = Cliente(srv.porta)
+        bruno.registra("bruno")
+        ana.proximo_evento(2)          # EVENTO ENTROU bruno, consumido
+        problemas = []
+        for _ in range(25):
+            ana.enviar("LIST")
+            cabecalho = ana._resposta(5)
+            if not cabecalho.startswith("LISTA "):
+                problemas.append("cabecalho %r" % cabecalho)
+                break
+            total = int(cabecalho.split()[1])
+            for _ in range(total):
+                linha = ana._resposta(5)
+                campos = linha.split(" ")
+                if len(campos) != 4 or campos[0] != "CONTATO":
+                    problemas.append("linha de contato %r" % linha)
+                    break
+                if not campos[3].isdigit():
+                    problemas.append("porta nao numerica em %r" % linha)
+                    break
+            if ana._resposta(5) != "FIM":
+                problemas.append("sem FIM")
+                break
+            # abala a lista enquanto o LIST esta em voo
+            bruno.fechar()
+            bruno = Cliente(srv.porta)
+            bruno.registra("bruno")
+            ana.proximo_evento(2)
+        assert not problemas, "LIST corrompido: %s" % problemas
+        ana.fechar()
+        bruno.fechar()
+
+
 # --------------------------------------------------------------------------- E4: grupo (lado servidor)
 
 def test_grupo_tres_destinatarios():

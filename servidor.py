@@ -121,6 +121,8 @@ class Servidor:
                     log("linha inválida de %s:%d (%s)" % (ip, endereco[1], erro))
                     cx.enviar("ERR", p.ERR_ENTRADA, str(erro))
                     continue
+                except socket.timeout:
+                    continue  # silêncio não é queda: a sessão continua
                 except OSError:
                     break
                 if linha is None:

@@ -9,6 +9,7 @@ Somente biblioteca padrão — a atividade proíbe biblioteca pronta de rede.
 """
 
 import socket
+import threading
 
 PORTA_SERVIDOR = 9990
 
@@ -102,9 +103,13 @@ class LeitorLinhas:
         self.buf = b""
 
     def linha(self, timeout=None):
-        """Próxima linha sem o terminador, ou None quando o par encerra a conexão."""
-        if timeout is not None:
-            self.sock.settimeout(timeout)
+        """Próxima linha sem o terminador, ou None quando o par encerra a conexão.
+
+        `timeout` vale para ESTA chamada: o socket é reconfigurado sempre, inclusive para
+        bloqueante (`None`). Deixar um timeout grudado no socket faz um silêncio de N segundos
+        virar `socket.timeout` na leitura de fundo — que não é fim de conexão coisa nenhuma.
+        """
+        self.sock.settimeout(timeout)
         while b"\n" not in self.buf:
             dados = self.sock.recv(4096)
             if not dados:
@@ -127,9 +132,14 @@ class Conexao:
     def __init__(self, sock):
         self.sock = sock
         self.leitor = LeitorLinhas(sock)
+        # Duas threads podem escrever na mesma conexão (resposta de comando numa, evento
+        # empurrado de outra sessão na outra): sem serializar, uma linha entra no meio da outra.
+        self._trava_envio = threading.Lock()
 
     def enviar(self, *campos):
-        self.sock.sendall(montar(*campos))
+        dados = montar(*campos)
+        with self._trava_envio:
+            self.sock.sendall(dados)
 
     def linha(self, timeout=None):
         return self.leitor.linha(timeout)

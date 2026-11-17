@@ -115,11 +115,20 @@ class Cliente:
             return "%s[%s]> " % (self.nick, self.conversa["nick"])
         return "%s> " % self.nick
 
-    def mostrar(self, texto):
+    def mostrar(self, texto, redesenhar=None):
+        """Escreve no terminal sem atropelar o que a pessoa digita.
+
+        Mensagem que chega de thread de fundo (evento, grupo, P2P) precisa reimprimir o prompt,
+        porque entrou em cima da linha de digitação. Resposta de comando sai do fluxo principal:
+        o próprio `input()` imprime o prompt na volta, e redesenhar aqui deixaria um prompt sobrando.
+        """
+        if redesenhar is None:
+            redesenhar = threading.current_thread() is not threading.main_thread()
         with self.trava_saida:
             if self.interativo:
                 sys.stdout.write("\r\033[K" + texto + "\n")
-                sys.stdout.write(self._texto_prompt())
+                if redesenhar:
+                    sys.stdout.write(self._texto_prompt())
             else:
                 sys.stdout.write(texto + "\n")
             sys.stdout.flush()
@@ -136,6 +145,8 @@ class Cliente:
         while True:
             try:
                 linha = self.cx.linha()
+            except socket.timeout:
+                continue  # socket.timeout é OSError, mas significa "silêncio", não "acabou"
             except OSError:
                 break
             if linha is None:
@@ -322,18 +333,27 @@ class Cliente:
     # ------------------------------------------------------------------ comandos
 
     def listar(self):
+        self._descartar_respostas_antigas()
         self.cx.enviar("LIST")
         cabecalho = self._resposta(6)
-        if not cabecalho or not cabecalho.startswith("LISTA "):
+        if cabecalho is None:
+            self.mostrar("[erro] o servidor não respondeu ao LIST — a sessão de controle caiu?")
+            return
+        if not cabecalho.startswith("LISTA "):
             self.mostrar("[erro] resposta inesperada do LIST: %r" % cabecalho)
             return
-        total = int(cabecalho.split()[1])
+        try:
+            total = int(cabecalho.split()[1])
+        except (IndexError, ValueError):
+            self.mostrar("[erro] cabeçalho de lista inválido: %r" % cabecalho)
+            return
         contatos = {}
         for _ in range(total):
             linha = self._resposta(6) or ""
             campos = p.separar(linha, 4)
-            if len(campos) < 4 or campos[0] != "CONTATO":
+            if len(campos) < 4 or campos[0] != "CONTATO" or not campos[3].isdigit():
                 self.mostrar("[erro] linha de contato inválida: %r" % linha)
+                self._descartar_respostas_antigas()
                 return
             contatos[campos[1]] = (campos[2], int(campos[3]))
         self._resposta(6)  # FIM
@@ -342,6 +362,14 @@ class Cliente:
         for nick, (ip, porta) in sorted(contatos.items()):
             marca = " (você)" if nick == self.nick else ""
             self.mostrar("   %-16s %s:%d%s" % (nick, ip, porta, marca))
+
+    def _descartar_respostas_antigas(self):
+        """Fila de respostas só deve conter o que o próximo comando vai ler."""
+        while True:
+            try:
+                self.respostas.get_nowait()
+            except queue.Empty:
+                return
 
     def _resposta(self, timeout=6):
         try:
@@ -373,7 +401,13 @@ class Cliente:
         comando, _, argumento = entrada.partition(" ")
         comando = comando.lower()
         argumento = argumento.strip()
+        try:
+            return self._despachar(comando, argumento)
+        except (OSError, ValueError) as erro:
+            self.mostrar("[erro] falha ao executar %s: %s" % (comando, erro))
+            return True
 
+    def _despachar(self, comando, argumento):
         if comando == "/listar":
             self.listar()
         elif comando == "/quem":
