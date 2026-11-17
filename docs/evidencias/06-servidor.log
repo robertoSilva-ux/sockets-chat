@@ -1,21 +1,21 @@
 # Log completo do servidor
 
-Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 00:18:37 -0300.
+Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 00:33:36 -0300.
 Conteúdo = stdout real dos processos (sem o prompt do terminal).
 
 ```
-[00:18:35] Servidor do chat no ar — TCP 127.0.0.1:39525 (controle) e UDP 127.0.0.1:39525 (grupo)
-[00:18:35] Ctrl+C para encerrar. Aguardando clientes...
-[00:18:35] REG carla 127.0.0.1:46385 (1 contato(s) no total)
-[00:18:35] REG bruno 127.0.0.1:35917 (2 contato(s) no total)
-[00:18:35] REG ana 127.0.0.1:40137 (3 contato(s) no total)
-[00:18:36] BC de ana 127.0.0.1:40137 seq=1 "reuniao de apresentacao 19h na sala 12" -> 3 destinatario(s)
-[00:18:36] BC de carla 127.0.0.1:46385 seq=1 "ok, levo o notebook" -> 3 destinatario(s)
-[00:18:36] registro recusado: nick 'ana' já em uso (pedido de 127.0.0.1)
-[00:18:36] ana pediu para sair
-[00:18:36] SAIU ana 127.0.0.1:40137 (2 contato(s) no total)
-[00:18:36] bruno pediu para sair
-[00:18:36] SAIU bruno 127.0.0.1:35917 (1 contato(s) no total)
-[00:18:36] carla pediu para sair
-[00:18:36] SAIU carla 127.0.0.1:46385 (0 contato(s) no total)
+[00:33:34] Servidor do chat no ar — TCP e UDP em 127.0.0.1:33955 (só nesta interface)
+[00:33:34] Ctrl+C para encerrar. Aguardando clientes...
+[00:33:34] REG carla 127.0.0.1:45469 (1 contato(s) no total)
+[00:33:34] REG bruno 127.0.0.1:46655 (2 contato(s) no total)
+[00:33:35] REG ana 127.0.0.1:32781 (3 contato(s) no total)
+[00:33:35] BC de ana 127.0.0.1:32781 seq=1 "reuniao de apresentacao 19h na sala 12" -> 3 destinatario(s)
+[00:33:35] BC de carla 127.0.0.1:45469 seq=1 "ok, levo o notebook" -> 3 destinatario(s)
+[00:33:35] registro recusado: nick 'ana' já em uso (pedido de 127.0.0.1)
+[00:33:35] ana pediu para sair
+[00:33:35] SAIU ana 127.0.0.1:32781 (2 contato(s) no total)
+[00:33:35] bruno pediu para sair
+[00:33:35] SAIU bruno 127.0.0.1:46655 (1 contato(s) no total)
+[00:33:35] carla pediu para sair
+[00:33:35] SAIU carla 127.0.0.1:45469 (0 contato(s) no total)
 ```

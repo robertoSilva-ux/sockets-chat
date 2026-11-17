@@ -69,6 +69,8 @@ Mostrar a árvore: `ls` (servidor.py, cliente.py, protocolo.py, docs/).
 | Sintoma | Ação |
 |---|---|
 | "porta 9990 indisponível" | `ss -ltnup 'sport = :9990'`; rodar `./demo.sh --porta 9991` e clientes com `--porta-servidor 9991` |
+| outro computador não conecta | usar o IP marcado **rede local** no banner do servidor (não o da VPN); liberar `9990/tcp` e `9990/udp` no firewalld; testar com `nc -vz <ip> 9990` |
+| conecta mas o P2P não abre | porta do cliente barrada: rodar os clientes com `--porta 5001`/`5002` e liberar `5001-5099/tcp` na máquina que recebe |
 | cliente não vê os outros | ele precisa ter recebido `EVENTO ENTROU` ou rodado `/listar`; a lista é pedida no registro |
 | P2P recusa com `404` | o destino não está na lista **deste** cliente: `/listar` e tentar de novo |
 | nada aparece no terminal | `python3 -u` ou conferir se está na janela certa do tmux (`Ctrl+b` + número) |

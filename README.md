@@ -34,6 +34,49 @@ Ou, com `tmux` instalado:
 ./demo.sh --porta 9991    # outra porta
 ```
 
+### No laboratório, com dois computadores
+
+O servidor escuta em **todas as interfaces** e imprime, ao subir, o endereço que o colega deve usar:
+
+```
+[00:32:51] Servidor do chat no ar — TCP e UDP na porta 9990, em todas as interfaces
+[00:32:51] Nesta máquina:   127.0.0.1      (para testar sozinho, na mesma máquina)
+[00:32:51]                  192.168.0.6     rede local
+[00:32:51]                  100.74.198.127  VPN/Tailscale
+[00:32:51] Em outro computador:  python3 cliente.py --nick ana --servidor 192.168.0.6
+```
+
+Na outra máquina, basta trocar o `--servidor`:
+
+```bash
+python3 cliente.py --nick bruno --servidor 192.168.0.6
+```
+
+O IP que aparece no `LIST` é o do remetente **como o servidor o viu** (`getpeername()`), não o que o
+cliente declarou — por isso o P2P entre máquinas funciona sem configuração extra: cada cliente
+escuta na própria porta em todas as interfaces e o par conecta direto naquele endereço.
+
+**Firewall.** Fedora com `firewalld` ativo bloqueia conexões de entrada por padrão. Na máquina que
+roda o servidor:
+
+```bash
+sudo firewall-cmd --add-port=9990/tcp --add-port=9990/udp               # até o próximo reload
+sudo firewall-cmd --permanent --add-port=9990/tcp --add-port=9990/udp   # persistente
+sudo firewall-cmd --reload
+```
+
+Para o **P2P** a porta é a do cliente (efêmera, por padrão). Se o colega não conseguir abrir a
+conversa, fixe as portas e libere a faixa na máquina que vai **receber**:
+
+```bash
+python3 cliente.py --nick bruno --porta 5002 --servidor 192.168.0.6
+sudo firewall-cmd --add-port=5001-5099/tcp
+```
+
+Diagnóstico rápido da outra máquina: `nc -vz 192.168.0.6 9990`.
+Não conecta → IP errado ou servidor fora do ar. Conecta mas nada chega → firewall, ou o IP da VPN
+usado no lugar do IP da rede local.
+
 ### Comandos do cliente
 
 ```

@@ -32,6 +32,53 @@ def log(texto):
     print("[%s] %s" % (agora(), texto), flush=True)
 
 
+def ips_rede():
+    """Endereços desta máquina que outro computador consegue usar (fora o loopback).
+
+    `connect()` em UDP não envia pacote nenhum: serve só para o kernel escolher a rota e
+    revelar qual endereço local seria usado para sair. Se não houver rota, sobra o hostname.
+    """
+    ips = set()
+    for destino in (("8.8.8.8", 80), ("10.255.255.255", 9)):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sonda:
+                sonda.connect(destino)
+                ips.add(sonda.getsockname()[0])
+        except OSError:
+            continue
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            ips.add(info[4][0])
+    except OSError:
+        pass
+    limpos = [ip for ip in ips if ip and not ip.startswith("127.") and ip != "0.0.0.0"]
+    return sorted(limpos, key=lambda ip: (prioridade_ip(ip), ip))
+
+
+def prioridade_ip(ip):
+    """Rede local primeiro; VPN (Tailscale/CGNAT) depois; o resto por último.
+
+    Sem isso a sugestão de comando sai com o IP da VPN, que o colega do laboratório não alcança.
+    """
+    partes = [int(p) for p in ip.split(".") if p.isdigit()]
+    if len(partes) != 4:
+        return 3
+    a, b = partes[0], partes[1]
+    if a == 192 and b == 168:
+        return 0
+    if a == 10 or (a == 172 and 16 <= b <= 31):
+        return 0
+    if a == 100 and 64 <= b <= 127:      # CGNAT: faixa do Tailscale
+        return 2
+    if a == 169 and b == 254:            # link-local: sem DHCP, não serve
+        return 3
+    return 1
+
+
+def rotulo_ip(ip):
+    return {0: "rede local", 2: "VPN/Tailscale", 3: "link-local"}.get(prioridade_ip(ip), "outra interface")
+
+
 class Contato:
     """Um cliente registrado. `saida` é a conexão de controle usada para empurrar eventos."""
 
@@ -86,8 +133,7 @@ class Servidor:
 
     def servir(self):
         threading.Thread(target=self._laco_grupo, name="grupo", daemon=True).start()
-        log("Servidor do chat no ar — TCP %s:%d (controle) e UDP %s:%d (grupo)"
-            % (self.host, self.porta, self.host, self.porta))
+        self._anunciar()
         log("Ctrl+C para encerrar. Aguardando clientes...")
         try:
             while True:
@@ -106,6 +152,24 @@ class Servidor:
                 except OSError:
                     pass
         return 0
+
+    def _anunciar(self):
+        if self.host not in ("0.0.0.0", ""):
+            log("Servidor do chat no ar — TCP e UDP em %s:%d (só nesta interface)"
+                % (self.host, self.porta))
+            return
+        log("Servidor do chat no ar — TCP e UDP na porta %d, em todas as interfaces" % self.porta)
+        ips = ips_rede()
+        log("Nesta máquina:   127.0.0.1      (para testar sozinho, na mesma máquina)")
+        for ip in ips:
+            log("                 %-15s %s" % (ip, rotulo_ip(ip)))
+        if ips:
+            log("Em outro computador:  python3 cliente.py --nick ana --servidor %s" % ips[0])
+        else:
+            log("Nenhum endereço de rede encontrado: só dá para testar nesta máquina.")
+        log("Se o outro computador não conectar, o firewall desta máquina pode estar barrando:")
+        log("  sudo firewall-cmd --add-port=%d/tcp --add-port=%d/udp" % (self.porta, self.porta))
+        log("  (para o P2P, use --porta fixa nos clientes e libere a faixa, ex.: 5001-5099/tcp)")
 
     def _sessao(self, con, endereco):
         """Thread de controle de um cliente: lê comandos, responde, empurra eventos."""

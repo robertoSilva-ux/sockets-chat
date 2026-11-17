@@ -347,6 +347,20 @@ def test_list_nao_corrompe_linha():
         bruno.fechar()
 
 
+def test_prioridade_de_endereco_anunciado():
+    """O servidor deve sugerir o IP da rede local, não o da VPN (Tailscale é 100.64/10)."""
+    sys.path.insert(0, str(RAIZ))
+    import servidor as srv_mod
+    assert srv_mod.prioridade_ip("192.168.0.6") == 0
+    assert srv_mod.prioridade_ip("10.1.2.3") == 0
+    assert srv_mod.prioridade_ip("172.20.0.5") == 0
+    assert srv_mod.prioridade_ip("100.74.198.127") == 2      # Tailscale/CGNAT
+    assert srv_mod.prioridade_ip("169.254.10.10") == 3        # link-local
+    assert srv_mod.prioridade_ip("200.17.1.1") == 1
+    ordenado = sorted(["100.74.198.127", "192.168.0.6"], key=lambda ip: (srv_mod.prioridade_ip(ip), ip))
+    assert ordenado[0] == "192.168.0.6", "a sugestão do banner sairia com o IP da VPN"
+
+
 # --------------------------------------------------------------------------- E4: grupo (lado servidor)
 
 def test_grupo_tres_destinatarios():
