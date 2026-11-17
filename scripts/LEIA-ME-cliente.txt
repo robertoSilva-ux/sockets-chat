@@ -1,50 +1,52 @@
-Sockets Chat - cliente (Av3 de Redes de Computadores, IFRS)
-===========================================================
+Sockets Chat — cliente
+Av3 de Redes de Computadores · IFRS Rio Grande
 
-O que e isto
-------------
-Cliente de um chat que fala com o servidor do trabalho. Estes dois arquivos
-(cliente.py e protocolo.py) sao tudo o que voce precisa; eles tem que ficar
-JUNTOS na mesma pasta.
+O que é
+-------
+Cliente do chat da atividade. Precisa de Python 3.8 ou superior e destes dois
+arquivos na MESMA pasta: cliente.py e protocolo.py.
 
-Como rodar
-----------
-1. Descompacte este zip (vai criar a pasta cliente-av3).
+Como usar
+---------
+1. Descompacte o pacote (vai criar a pasta cliente-av3).
 2. Abra o terminal dentro dessa pasta.
-3. Descubra o endereco do servidor com quem vai jogar (ele mostra na tela
-   uma linha assim: "192.168.0.6   rede local"). Esse e o IP que voce usa.
-4. Rode (Windows):
+3. Rode, com os dados do servidor que você vai usar:
 
-     python cliente.py --nick seu_nick --servidor 192.168.0.6
+     python cliente.py --nick seu_nick --servidor 192.168.0.10
 
-   No Linux ou macOS, troque python por python3.
+   No Linux e no macOS, use python3.
 
-   - seu_nick: 3 a 16 caracteres, letras sem acento, numeros, _ ou -
-   - --servidor: o IP da maquina que esta rodando o servidor.py (NAO use
-     127.0.0.1: isso aponta para a sua propria maquina)
-   - opcional: --porta 5001 fixa a sua porta (util se o firewall reclamar)
+     --nick      apelido de 3 a 16 caracteres (letras sem acento, números, _ ou -)
+     --servidor  IP da máquina onde o servidor.py está rodando. Não use
+                 127.0.0.1: isso aponta para a sua própria máquina.
+     --porta     opcional; fixa a sua porta (por exemplo --porta 5001), útil
+                 quando o firewall bloqueia a porta sorteada
 
-Comandos dentro do chat
------------------------
-  /listar          mostra quem esta conectado (nick, ip, porta)
-  /p2p <nick>      abre conversa direta (TCP) com aquela pessoa
-  /grupo <texto>   manda o texto para todos (UDP, pelo servidor)
+   O IP correto é o que o servidor mostra ao subir, na linha marcada
+   "rede local".
+
+Comandos
+--------
+  /listar          quem está conectado (nick, IP e porta)
+  /p2p <nick>      conversa direta (TCP) com essa pessoa
+  /grupo <texto>   envia o texto para todos (UDP, pelo servidor)
   /sair            encerra a conversa aberta; fora dela, sai do chat
 
-Se der erro
------------
-"ModuleNotFoundError: No module named 'protocolo'"
-   > os dois arquivos nao estao juntos, ou voce esta rodando de outra pasta.
-     Entre na pasta cliente-av3 e rode de novo.
+Problemas comuns
+----------------
+ModuleNotFoundError: No module named 'protocolo'
+  Os dois arquivos não estão juntos, ou o terminal está em outra pasta.
+  Entre na pasta cliente-av3 e rode de novo.
 
-"servidor 127.0.0.1:9990 inacessivel"
-   > voce esqueceu o --servidor, ou o servidor nao esta no ar.
+"servidor 127.0.0.1:9990 inacessível"
+  Faltou o --servidor, ou o servidor não está no ar.
 
-Nao aparece ninguem no /listar
-   > confira o IP: tem que ser o "rede local" mostrado na tela do servidor.
+O /listar não mostra ninguém
+  Confira o IP: precisa ser o da rede local, o mesmo que aparece na tela do
+  servidor.
 
-/listar e /grupo funcionam, mas /p2p diz que o outro "esta em outra conversa"
-ou a conversa nao abre
-   > o firewall da maquina que RECEBE a conversa pode estar barrando a porta.
-     No Windows, a primeira execucao pergunta: escolha "Permitir acesso"
-     (redes privadas). Ou rode com --porta 5001 e libere essa porta.
+O /listar e o /grupo funcionam, mas o /p2p não abre a conversa
+  O firewall da máquina que RECEBE a conversa pode estar bloqueando a porta de
+  entrada. No Windows, a primeira execução abre um aviso: escolha "Permitir
+  acesso" para redes privadas. Alternativa: rodar com --porta 5001 e liberar
+  essa porta.
