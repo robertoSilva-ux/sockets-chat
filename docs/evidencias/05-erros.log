@@ -1,0 +1,35 @@
+# Erros como protocolo, não como traceback (E5)
+
+Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-16 23:55:46 -0300.
+Conteúdo = stdout real dos processos (sem o prompt do terminal).
+
+```
+### cliente repetindo nick em uso
+[erro] nick 'ana' já está em uso.
+
+
+### ana: contato offline e comando inválido
+[+] registrado como ana — servidor vê 127.0.0.1:46745; minha porta local é 46745
+[lista] 3 contato(s)
+   ana              127.0.0.1:46745 (você)
+   bruno            127.0.0.1:44939
+   carla            127.0.0.1:33249
+comandos:
+  /listar          pede ao servidor a lista de contatos (nick, ip, porta)
+  /quem            mostra a lista que já está em memória
+  /p2p <nick>      abre conversa ponto a ponto direta (TCP) com <nick>
+  /grupo <texto>   envia <texto> para todos os clientes (UDP, via servidor)
+  /sair            encerra a conversa aberta ou, fora dela, sai do chat
+dentro de uma conversa, texto sem "/" vai para o par.
+[lista] 3 contato(s)
+   ana              127.0.0.1:46745 (você)
+   bruno            127.0.0.1:44939
+   carla            127.0.0.1:33249
+[p2p] conectado a bruno (127.0.0.1:44939) — /sair encerra
+bruno> consegui, porta 9990 nos dois protocolos
+[p2p] conversa com bruno encerrada
+[grupo ana] reuniao de apresentacao 19h na sala 12
+[grupo carla] ok, levo o notebook
+[p2p] contato_offline: 'fantasma' não está na lista (use /listar)
+comando desconhecido: /comando-que-nao-existe (use /ajuda)
+```
