@@ -227,5 +227,8 @@ __marimo__/
 !docs/evidencias/*.log
 
 # Pacote de distribuicao do cliente: artefato de entrega, regeneravel por
-# scripts/empacotar-cliente.sh (o dist/ acima e heranca do template de empacotamento)
+# scripts/empacotar-cliente.sh. Precisa reabrir o diretorio antes do arquivo:
+# git nao desce em pasta ignorada, entao "!dist/arquivo" sozinho nao faz efeito.
+!dist/
+dist/*
 !dist/sockets-chat-cliente.zip
