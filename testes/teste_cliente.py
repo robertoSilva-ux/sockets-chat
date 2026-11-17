@@ -270,7 +270,7 @@ def test_listar_depois_de_ociosidade():
         bruno = ClienteProc("bruno", srv.porta)
         ana.exigir("[+] bruno entrou")
         time.sleep(8.0)
-        assert "conexão com o servidor foi encerrada" not in ana.saida(), \
+        assert "encerrada" not in ana.saida(), \
             "cliente achou que a conexão caiu durante o silêncio:\n%s" % ana.saida()
         ana.digitar("/listar")
         ana.exigir("[lista] 2 contato(s)")
@@ -286,7 +286,8 @@ def test_servidor_encerra_avisa_cliente():
     with Servidor() as srv:
         ana = ClienteProc("ana", srv.porta)
         srv.proc.terminate()
-        ana.exigir("conexão com o servidor foi encerrada", timeout=6)
+        linha = ana.exigir("sessão com o servidor", timeout=6)
+        assert "encerrada" in linha
         ana.sem_traceback()
         ana.fechar()
 

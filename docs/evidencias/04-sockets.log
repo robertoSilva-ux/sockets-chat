@@ -1,27 +1,27 @@
 # Sockets abertos: TCP (controle/P2P) e UDP (grupo) (R7)
 
-Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 00:38:01 -0300.
+Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 01:29:25 -0300.
 Conteúdo = stdout real dos processos (sem o prompt do terminal).
 
 ```
 $ ss -tunap   # capturado DURANTE a conversa ponto a ponto
 #       estado local                remoto              processo
-udp   UNCONN     0      0                                   127.0.0.1:44503        0.0.0.0:*     users:(("python3",pid=174600,fd=4))
-udp   UNCONN     0      0                                     0.0.0.0:34433        0.0.0.0:*     users:(("python3",pid=174617,fd=4))
-udp   UNCONN     0      0                                     0.0.0.0:40977        0.0.0.0:*     users:(("python3",pid=174604,fd=4))
-udp   UNCONN     0      0                                     0.0.0.0:43835        0.0.0.0:*     users:(("python3",pid=174611,fd=4))
-tcp   LISTEN     0      16                                  127.0.0.1:44503        0.0.0.0:*     users:(("python3",pid=174600,fd=3))
-tcp   LISTEN     0      4                                     0.0.0.0:34433        0.0.0.0:*     users:(("python3",pid=174617,fd=3))
-tcp   LISTEN     0      4                                     0.0.0.0:43835        0.0.0.0:*     users:(("python3",pid=174611,fd=3))
-tcp   LISTEN     0      4                                     0.0.0.0:40977        0.0.0.0:*     users:(("python3",pid=174604,fd=3))
-tcp   ESTAB      0      0                                   127.0.0.1:44503      127.0.0.1:36346 users:(("python3",pid=174600,fd=5))
-tcp   ESTAB      0      0                                   127.0.0.1:36344      127.0.0.1:44503 users:(("python3",pid=174604,fd=5))
-tcp   ESTAB      0      0                                   127.0.0.1:36346      127.0.0.1:44503 users:(("python3",pid=174611,fd=5))
-tcp   ESTAB      0      0                                   127.0.0.1:36354      127.0.0.1:44503 users:(("python3",pid=174617,fd=5))
-tcp   ESTAB      0      0                                   127.0.0.1:44503      127.0.0.1:36344 users:(("python3",pid=174600,fd=6))
-tcp   ESTAB      0      0                                   127.0.0.1:43835      127.0.0.1:40014 users:(("python3",pid=174611,fd=6))
-tcp   ESTAB      0      0                                   127.0.0.1:44503      127.0.0.1:36354 users:(("python3",pid=174600,fd=7))
-tcp   ESTAB      0      0                                   127.0.0.1:40014      127.0.0.1:43835 users:(("python3",pid=174617,fd=7))
+udp   UNCONN     0      0                                     0.0.0.0:34325        0.0.0.0:*     users:(("python3",pid=191634,fd=4))
+udp   UNCONN     0      0                                   127.0.0.1:36371        0.0.0.0:*     users:(("python3",pid=191618,fd=4))
+udp   UNCONN     0      0                                     0.0.0.0:37469        0.0.0.0:*     users:(("python3",pid=191628,fd=4))
+udp   UNCONN     0      0                                     0.0.0.0:39559        0.0.0.0:*     users:(("python3",pid=191622,fd=4))
+tcp   LISTEN     0      4                                     0.0.0.0:34325        0.0.0.0:*     users:(("python3",pid=191634,fd=3))
+tcp   LISTEN     0      4                                     0.0.0.0:39559        0.0.0.0:*     users:(("python3",pid=191622,fd=3))
+tcp   LISTEN     0      4                                     0.0.0.0:37469        0.0.0.0:*     users:(("python3",pid=191628,fd=3))
+tcp   LISTEN     0      16                                  127.0.0.1:36371        0.0.0.0:*     users:(("python3",pid=191618,fd=3))
+tcp   ESTAB      0      0                                   127.0.0.1:36371      127.0.0.1:54940 users:(("python3",pid=191618,fd=5))
+tcp   ESTAB      0      0                                   127.0.0.1:36371      127.0.0.1:54924 users:(("python3",pid=191618,fd=6))
+tcp   ESTAB      0      0                                   127.0.0.1:54924      127.0.0.1:36371 users:(("python3",pid=191622,fd=5))
+tcp   ESTAB      0      0                                   127.0.0.1:54940      127.0.0.1:36371 users:(("python3",pid=191628,fd=5))
+tcp   ESTAB      0      0                                   127.0.0.1:54948      127.0.0.1:36371 users:(("python3",pid=191634,fd=5))
+tcp   ESTAB      0      0                                   127.0.0.1:37469      127.0.0.1:41294 users:(("python3",pid=191628,fd=6))
+tcp   ESTAB      0      0                                   127.0.0.1:41294      127.0.0.1:37469 users:(("python3",pid=191634,fd=7))
+tcp   ESTAB      0      0                                   127.0.0.1:36371      127.0.0.1:54948 users:(("python3",pid=191618,fd=7))
 
 # Os dois lados da conversa P2P aparecem ligados entre si (portas dos clientes),
 # e cada cliente tem também uma sessão de controle com a porta do servidor.

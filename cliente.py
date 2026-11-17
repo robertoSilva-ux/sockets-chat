@@ -92,8 +92,8 @@ class Cliente:
             if resposta.startswith("OK"):
                 _, nick, ip, porta = p.separar(resposta, 4)
                 self.nick = nick
-                self.mostrar("[+] registrado como %s — servidor vê %s:%s; minha porta local é %d"
-                             % (nick, ip, porta, self.porta))
+                self.mostrar("[+] registrado como %s — servidor %s:%d registrou %s:%s"
+                             % (nick, self.host_servidor, self.porta_servidor, ip, porta))
                 return True
             if resposta.startswith("ERR 409"):
                 self.mostrar("[erro] nick %r já está em uso." % self.nick)
@@ -155,7 +155,8 @@ class Cliente:
             else:
                 self.respostas.put(linha)
         self.rodando = False
-        self.mostrar("[!] conexão com o servidor foi encerrada")
+        self.mostrar("[!] sessão com o servidor %s:%d encerrada"
+                     % (self.host_servidor, self.porta_servidor))
 
     def _evento(self, linha):
         campos = p.separar(linha, 5)

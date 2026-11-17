@@ -138,8 +138,8 @@ def main():
 
 def _porta_de(cliente):
     for linha in cliente.saida().splitlines():
-        if "minha porta local é" in linha:
-            return int(linha.rsplit(" ", 1)[1])
+        if "registrou" in linha:                      # "... registrou 127.0.0.1:37757"
+            return int(linha.rsplit(":", 1)[1].strip())
     return 0
 
 

@@ -1,6 +1,6 @@
 # Erros como protocolo, não como traceback (E5)
 
-Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 00:38:01 -0300.
+Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 01:29:25 -0300.
 Conteúdo = stdout real dos processos (sem o prompt do terminal).
 
 ```
@@ -9,11 +9,11 @@ Conteúdo = stdout real dos processos (sem o prompt do terminal).
 
 
 ### ana: contato offline e comando inválido
-[+] registrado como ana — servidor vê 127.0.0.1:34433; minha porta local é 34433
+[+] registrado como ana — servidor 127.0.0.1:36371 registrou 127.0.0.1:34325
 [lista] 3 contato(s)
-   ana              127.0.0.1:34433 (você)
-   bruno            127.0.0.1:43835
-   carla            127.0.0.1:40977
+   ana              127.0.0.1:34325 (você)
+   bruno            127.0.0.1:37469
+   carla            127.0.0.1:39559
 comandos:
   /listar          pede ao servidor a lista de contatos (nick, ip, porta)
   /p2p <nick>      abre conversa ponto a ponto direta (TCP) com <nick>
@@ -21,10 +21,10 @@ comandos:
   /sair            encerra a conversa aberta ou, fora dela, sai do chat
 dentro de uma conversa, texto sem "/" vai para o par.
 [lista] 3 contato(s)
-   ana              127.0.0.1:34433 (você)
-   bruno            127.0.0.1:43835
-   carla            127.0.0.1:40977
-[p2p] conectado a bruno (127.0.0.1:43835) — /sair encerra
+   ana              127.0.0.1:34325 (você)
+   bruno            127.0.0.1:37469
+   carla            127.0.0.1:39559
+[p2p] conectado a bruno (127.0.0.1:37469) — /sair encerra
 bruno> consegui, porta 9990 nos dois protocolos
 [p2p] conversa com bruno encerrada
 [p2p] bruno encerrou a conversa
