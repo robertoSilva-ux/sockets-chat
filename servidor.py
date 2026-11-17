@@ -340,6 +340,7 @@ class Servidor:
 
 
 def main(argv=None):
+    p.console_seguro()
     ap = argparse.ArgumentParser(description="Servidor do chat (Av3 — Redes de Computadores)")
     ap.add_argument("--host", default="0.0.0.0", help="endereço de escuta (padrão: todas as interfaces)")
     ap.add_argument("--porta", type=int, default=p.PORTA_SERVIDOR,

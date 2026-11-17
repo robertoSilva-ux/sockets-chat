@@ -77,6 +77,33 @@ Diagnóstico rápido da outra máquina: `nc -vz 192.168.0.6 9990`.
 Não conecta → IP errado ou servidor fora do ar. Conecta mas nada chega → firewall, ou o IP da VPN
 usado no lugar do IP da rede local.
 
+### Distribuir o cliente para os colegas
+
+Para quem só vai **usar** o chat, não precisa clonar nada: o cliente são dois arquivos.
+
+```bash
+./scripts/empacotar-cliente.sh      # gera dist/sockets-chat-cliente.zip (cliente.py + protocolo.py + LEIA-ME)
+```
+
+O colega descompacta e roda de dentro da pasta:
+
+```bash
+python cliente.py --nick aluno --servidor 192.168.0.6      # Linux/macOS: python3
+```
+
+O `LEIA-ME.txt` dentro do zip já traz isso e os erros comuns. Três tropeços que valem avisar:
+
+1. **Os dois `.py` precisam ficar juntos** — rodar de outra pasta dá
+   `ModuleNotFoundError: No module named 'protocolo'`.
+2. **`--servidor` é obrigatório na prática**: o padrão `127.0.0.1` aponta para a própria máquina
+   dele. Use o IP marcado *rede local* no banner do servidor.
+3. **Firewall da máquina do colega**: `/listar` e `/grupo` são conexões de saída e funcionam mesmo
+   com ele fechado; só o `/p2p` precisa aceitar conexão de entrada. No Windows aparece um aviso na
+   primeira execução — "Permitir acesso" em redes privadas.
+
+O zip do repositório inteiro (botão *Code → Download ZIP* no GitHub) também funciona, só é maior:
+leva servidor, testes e documentação junto.
+
 ### Comandos do cliente
 
 ```

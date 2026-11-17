@@ -458,6 +458,7 @@ class Cliente:
 
 
 def main(argv=None):
+    p.console_seguro()
     ap = argparse.ArgumentParser(description="Cliente do chat (Av3 — Redes de Computadores)")
     ap.add_argument("--nick", required=True, help="seu apelido (3-16: letras, números, _ e -)")
     ap.add_argument("--servidor", default="127.0.0.1", help="IP do servidor (padrão: 127.0.0.1)")

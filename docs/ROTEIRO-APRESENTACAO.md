@@ -77,3 +77,22 @@ Mostrar a árvore: `ls` (servidor.py, cliente.py, protocolo.py, docs/).
 
 Rede de segurança: as evidências gravadas em `docs/evidencias/` mostram os quatro fluxos; e as
 suítes rodam em 25 s se for preciso demonstrar sem digitar.
+
+## Antes de entrar na sala (checklist de 5 minutos)
+
+```bash
+cd ~/Documentos/ifrs/redes/av3-sockets-chat
+git pull                                    # o repo precisa estar atualizado
+ss -ltnp 'sport = :9990'                    # nada ocupando a porta
+./scripts/empacotar-cliente.sh               # zip para os colegas (se for usar outra máquina)
+python3 servidor.py                          # anote o IP marcado "rede local"
+python3 cliente.py --nick teste              # em outro terminal, confirme que registra
+python3 testes/teste_protocolo.py | tail -1  # 16/16
+python3 testes/teste_cliente.py | tail -1    # 11/11
+```
+
+Se um colega for entrar pela rede: `nc -vz <ip> 9990` da máquina dele antes da aula, e a máquina
+que **recebe** P2P precisa liberar a porta de escuta (no Windows, aceitar o aviso do firewall).
+
+Regra de ouro: **todos os clientes com o mesmo `--servidor`** — mesma máquina usa `127.0.0.1`,
+máquinas diferentes usam o IP da rede local. Misturar dá `403 origem_invalida`.

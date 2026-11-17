@@ -9,6 +9,7 @@ Somente biblioteca padrão — a atividade proíbe biblioteca pronta de rede.
 """
 
 import socket
+import sys
 import threading
 
 PORTA_SERVIDOR = 9990
@@ -34,6 +35,20 @@ ERR_OFFLINE = 410
 
 class ErroProtocolo(Exception):
     """Linha inválida vinda da rede. Tratada no laço de leitura, nunca mata o processo."""
+
+
+def console_seguro():
+    """Impede que acento ou travessão derrubem o programa.
+
+    Console Windows em cp850 (padrão do cmd em pt-BR) não tem o travessão "—" e levanta
+    UnicodeEncodeError só por imprimir a mensagem de registro. Aqui os fluxos passam a
+    substituir o que não couber na codificação do terminal em vez de estourar.
+    """
+    for fluxo in (sys.stdout, sys.stderr):
+        try:
+            fluxo.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass  # fluxo sem reconfigure (pipe exótico) ou já fechado
 
 
 def normalizar_nick(nick):
