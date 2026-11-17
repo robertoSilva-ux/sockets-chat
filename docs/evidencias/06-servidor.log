@@ -1,21 +1,21 @@
 # Log completo do servidor
 
-Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 00:33:36 -0300.
+Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 00:38:02 -0300.
 Conteúdo = stdout real dos processos (sem o prompt do terminal).
 
 ```
-[00:33:34] Servidor do chat no ar — TCP e UDP em 127.0.0.1:33955 (só nesta interface)
-[00:33:34] Ctrl+C para encerrar. Aguardando clientes...
-[00:33:34] REG carla 127.0.0.1:45469 (1 contato(s) no total)
-[00:33:34] REG bruno 127.0.0.1:46655 (2 contato(s) no total)
-[00:33:35] REG ana 127.0.0.1:32781 (3 contato(s) no total)
-[00:33:35] BC de ana 127.0.0.1:32781 seq=1 "reuniao de apresentacao 19h na sala 12" -> 3 destinatario(s)
-[00:33:35] BC de carla 127.0.0.1:45469 seq=1 "ok, levo o notebook" -> 3 destinatario(s)
-[00:33:35] registro recusado: nick 'ana' já em uso (pedido de 127.0.0.1)
-[00:33:35] ana pediu para sair
-[00:33:35] SAIU ana 127.0.0.1:32781 (2 contato(s) no total)
-[00:33:35] bruno pediu para sair
-[00:33:35] SAIU bruno 127.0.0.1:46655 (1 contato(s) no total)
-[00:33:35] carla pediu para sair
-[00:33:35] SAIU carla 127.0.0.1:45469 (0 contato(s) no total)
+[00:38:00] Servidor do chat no ar — TCP e UDP em 127.0.0.1:44503 (só nesta interface)
+[00:38:00] Ctrl+C para encerrar. Aguardando clientes...
+[00:38:01] REG carla 127.0.0.1:40977 (1 contato(s) no total)
+[00:38:01] REG bruno 127.0.0.1:43835 (2 contato(s) no total)
+[00:38:01] REG ana 127.0.0.1:34433 (3 contato(s) no total)
+[00:38:01] BC de ana 127.0.0.1:34433 seq=1 "reuniao de apresentacao 19h na sala 12" -> 3 destinatario(s)
+[00:38:01] BC de carla 127.0.0.1:40977 seq=1 "ok, levo o notebook" -> 3 destinatario(s)
+[00:38:01] registro recusado: nick 'ana' já em uso (pedido de 127.0.0.1)
+[00:38:01] ana pediu para sair
+[00:38:01] SAIU ana 127.0.0.1:34433 (2 contato(s) no total)
+[00:38:01] bruno pediu para sair
+[00:38:01] SAIU bruno 127.0.0.1:43835 (1 contato(s) no total)
+[00:38:01] carla pediu para sair
+[00:38:01] SAIU carla 127.0.0.1:40977 (0 contato(s) no total)
 ```

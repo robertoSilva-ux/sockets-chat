@@ -11,7 +11,7 @@ Concorrência (ver docs/ARQUITETURA.md §2): quatro fontes de evento ao mesmo te
 Toda escrita no terminal passa por `mostrar()`, que segura um lock e reimprime o prompt,
 senão mensagem recebida entra no meio do que a pessoa está digitando.
 
-Comandos: /listar  /quem  /p2p <nick>  /grupo <texto>  /ajuda  /sair
+Comandos: /listar  /p2p <nick>  /grupo <texto>  /ajuda  /sair
 Dentro de uma conversa P2P, texto sem "/" vai para o par; /sair encerra só a conversa.
 """
 
@@ -27,7 +27,6 @@ import protocolo as p
 AJUDA = """\
 comandos:
   /listar          pede ao servidor a lista de contatos (nick, ip, porta)
-  /quem            mostra a lista que já está em memória
   /p2p <nick>      abre conversa ponto a ponto direta (TCP) com <nick>
   /grupo <texto>   envia <texto> para todos os clientes (UDP, via servidor)
   /sair            encerra a conversa aberta ou, fora dela, sai do chat
@@ -410,12 +409,6 @@ class Cliente:
     def _despachar(self, comando, argumento):
         if comando == "/listar":
             self.listar()
-        elif comando == "/quem":
-            if not self.contatos:
-                self.mostrar("(lista vazia — use /listar)")
-            for nick, (ip, porta) in sorted(self.contatos.items()):
-                self.mostrar("   %-16s %s:%d%s"
-                             % (nick, ip, porta, " (você)" if nick == self.nick else ""))
         elif comando == "/p2p":
             if not argumento:
                 self.mostrar("uso: /p2p <nick>")

@@ -81,7 +81,6 @@ usado no lugar do IP da rede local.
 
 ```
 /listar          pede ao servidor a lista de contatos (nick, ip, porta)
-/quem            mostra a lista que já está em memória
 /p2p <nick>      abre conversa ponto a ponto direta (TCP) com <nick>
 /grupo <texto>   envia <texto> para todos os clientes (UDP, via servidor)
 /sair            encerra a conversa aberta ou, fora dela, sai do chat

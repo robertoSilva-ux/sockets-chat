@@ -8,7 +8,7 @@ o board é o **fluxo**. Quando a ordem mudar, os dois mudam juntos.
 | # | Incremento | Depende de | Aceite (como se prova) |
 |---|---|---|---|
 | **E1** | Contrato de fio + servidor de controle (registro, lista, presença) | — | `python3 testes/teste_protocolo.py -k controle` verde; 2 `nc` registram e um `LIST` mostra os dois com ip/porta |
-| **E2** | Cliente: sessão de controle, `/listar`, `/quem`, eventos `ENTROU`/`SAIU` | E1 | abrir 3 clientes e ver, no prompt dos outros, o evento de entrada e de saída em menos de 1 s |
+| **E2** | Cliente: sessão de controle, `/listar`, eventos `ENTROU`/`SAIU` | E1 | abrir 3 clientes e ver, no prompt dos outros, o evento de entrada e de saída em menos de 1 s |
 | **E3** | Ponto a ponto TCP direto entre clientes | E1, E2 | ana e bruno trocam mensagens com o log do servidor parado; terceira tentativa de entrada recebe `OCUPADO` |
 | **E4** | Grupo via UDP (broadcast pelo servidor) | E1, E2 | `/grupo` de um cliente aparece nos outros dois; servidor loga "3 destinatários"; `seq` com lacuna é sinalizado |
 | **E5** | Robustez: erros, quotas, queda, spoof, linha > 1024, porta ocupada | E3, E4 | suíte completa verde (`python3 testes/teste_protocolo.py`), incluindo `ERR 409`, `ERR 401`, `ERR 403`, `410 contato_offline` |

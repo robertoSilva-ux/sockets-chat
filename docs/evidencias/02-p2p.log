@@ -1,63 +1,60 @@
 # Ponto a ponto TCP direto (R5)
 
-Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 00:33:35 -0300.
+Evidência capturada por `testes/gerar_evidencias.py` em 2026-11-17 00:38:01 -0300.
 Conteúdo = stdout real dos processos (sem o prompt do terminal).
 
 ```
 ### ana
-[+] registrado como ana — servidor vê 127.0.0.1:32781; minha porta local é 32781
+[+] registrado como ana — servidor vê 127.0.0.1:34433; minha porta local é 34433
 [lista] 3 contato(s)
-   ana              127.0.0.1:32781 (você)
-   bruno            127.0.0.1:46655
-   carla            127.0.0.1:45469
+   ana              127.0.0.1:34433 (você)
+   bruno            127.0.0.1:43835
+   carla            127.0.0.1:40977
 comandos:
   /listar          pede ao servidor a lista de contatos (nick, ip, porta)
-  /quem            mostra a lista que já está em memória
   /p2p <nick>      abre conversa ponto a ponto direta (TCP) com <nick>
   /grupo <texto>   envia <texto> para todos os clientes (UDP, via servidor)
   /sair            encerra a conversa aberta ou, fora dela, sai do chat
 dentro de uma conversa, texto sem "/" vai para o par.
 [lista] 3 contato(s)
-   ana              127.0.0.1:32781 (você)
-   bruno            127.0.0.1:46655
-   carla            127.0.0.1:45469
-[p2p] conectado a bruno (127.0.0.1:46655) — /sair encerra
+   ana              127.0.0.1:34433 (você)
+   bruno            127.0.0.1:43835
+   carla            127.0.0.1:40977
+[p2p] conectado a bruno (127.0.0.1:43835) — /sair encerra
 bruno> consegui, porta 9990 nos dois protocolos
 [p2p] conversa com bruno encerrada
 [p2p] bruno encerrou a conversa
 
 ### bruno
-[+] registrado como bruno — servidor vê 127.0.0.1:46655; minha porta local é 46655
+[+] registrado como bruno — servidor vê 127.0.0.1:43835; minha porta local é 43835
 [lista] 2 contato(s)
-   bruno            127.0.0.1:46655 (você)
-   carla            127.0.0.1:45469
+   bruno            127.0.0.1:43835 (você)
+   carla            127.0.0.1:40977
 comandos:
   /listar          pede ao servidor a lista de contatos (nick, ip, porta)
-  /quem            mostra a lista que já está em memória
   /p2p <nick>      abre conversa ponto a ponto direta (TCP) com <nick>
   /grupo <texto>   envia <texto> para todos os clientes (UDP, via servidor)
   /sair            encerra a conversa aberta ou, fora dela, sai do chat
 dentro de uma conversa, texto sem "/" vai para o par.
-[+] ana entrou (127.0.0.1:32781)
-[p2p] ana conectou (127.0.0.1:49076) — /sair encerra
+[+] ana entrou (127.0.0.1:34433)
+[p2p] ana conectou (127.0.0.1:40014) — /sair encerra
 ana> oi bruno, conseguiu rodar o servidor?
 [p2p] carla tentou entrar, mas já estou em conversa
 [p2p] ana encerrou a conversa
 [p2p] conversa com ana encerrada
 
 ### carla (tentativa com bruno ocupado)
-[+] registrado como carla — servidor vê 127.0.0.1:45469; minha porta local é 45469
+[+] registrado como carla — servidor vê 127.0.0.1:40977; minha porta local é 40977
 [lista] 1 contato(s)
-   carla            127.0.0.1:45469 (você)
+   carla            127.0.0.1:40977 (você)
 comandos:
   /listar          pede ao servidor a lista de contatos (nick, ip, porta)
-  /quem            mostra a lista que já está em memória
   /p2p <nick>      abre conversa ponto a ponto direta (TCP) com <nick>
   /grupo <texto>   envia <texto> para todos os clientes (UDP, via servidor)
   /sair            encerra a conversa aberta ou, fora dela, sai do chat
 dentro de uma conversa, texto sem "/" vai para o par.
-[+] bruno entrou (127.0.0.1:46655)
-[+] ana entrou (127.0.0.1:32781)
+[+] bruno entrou (127.0.0.1:43835)
+[+] ana entrou (127.0.0.1:34433)
 [p2p] bruno está em outra conversa
 
 ### log do SERVIDOR durante a conversa (nenhuma mensagem passou por ele)
