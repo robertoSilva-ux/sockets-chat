@@ -225,3 +225,7 @@ __marimo__/
 # Evidências de execução deste projeto: são logs reais e precisam ir para o repositório
 # (o *.log acima é herança do template de Django e não vale para docs/evidencias/)
 !docs/evidencias/*.log
+
+# Pacote de distribuicao do cliente: artefato de entrega, regeneravel por
+# scripts/empacotar-cliente.sh (o dist/ acima e heranca do template de empacotamento)
+!dist/sockets-chat-cliente.zip
