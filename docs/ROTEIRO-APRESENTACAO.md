@@ -1,98 +1,200 @@
-# Roteiro da apresentação — 10 minutos
+# Guia de apresentação — Sockets Chat (Av3)
 
-Preparação: `./demo.sh` já sobe servidor + 3 clientes. Tenha este roteiro impresso e um terminal
-extra para `ss`/testes. Se `tmux` não existir, abra 4 terminais.
+> Documento de apoio para a apresentação em laboratório. À esquerda o que falar; à direita o que
+> mostrar na tela. Tempo alvo: **10 a 12 minutos**, com demo ao vivo em 2 ou 3 máquinas.
+> Para levar impresso, use [`COLA-APRESENTACAO.md`](COLA-APRESENTACAO.md) (uma página).
 
-## 0. Abertura (30 s)
+## Antes de entrar na sala (5 min)
 
-> "É um WhatsApp de terminal. Um servidor na porta 9990 e três clientes. Conversa entre duas pessoas
-> é **TCP direto entre os clientes** — o servidor só apresenta os endereços. Conversa de grupo é
-> **UDP pelo servidor**. Só biblioteca padrão: nenhuma biblioteca de rede."
+```bash
+cd ~/Documentos/ifrs/redes/av3-sockets-chat
+git pull                                     # repo atualizado
+ss -ltnp 'sport = :9990'                     # porta livre (nada deve aparecer)
+./scripts/empacotar-cliente.sh                # zip para os colegas, se ainda não baixaram
+python3 servidor.py                           # ANOTE o IP marcado "rede local"
+```
 
-Mostrar a árvore: `ls` (servidor.py, cliente.py, protocolo.py, docs/).
+Nas máquinas dos colegas: descompactar o zip e `nc -vz <ip> 9990` **antes** de começar. Se o teste
+falhar, resolva agora: firewall (`sudo firewall-cmd --add-port=9990/tcp --add-port=9990/udp`) ou IP
+errado (não use o do Tailscale).
 
-## 1. Registro e lista — R1, R2, R3, R4 (1 min 30 s)
+**Regra de ouro**: todos os clientes com o **mesmo** `--servidor`. Mesma máquina → `127.0.0.1`;
+máquinas diferentes → o IP da rede local. Misturar dá `403 origem_invalida`.
 
-1. Mostrar a janela do servidor: já logou as três entradas (`REG ana ...`, `REG bruno ...`).
-2. Em `ana`: `/listar`.
-   > "O servidor guarda nick, IP e porta de cada cliente. O IP não foi o cliente que disse: veio do
-   > `getpeername()` — o cliente só declara a porta onde escuta."
-3. Em `bruno`, digitar `/listar` e voltar para `ana`.
-   > "Quando o bruno entrou, a ana recebeu o evento sem apertar nada: a sessão de controle é
-   > persistente. Some o contato do `LIST`? Não: quem fecha o socket sai da lista na hora."
+## Montagem da demo
 
-## 2. Ponto a ponto — R5 (2 min 30 s)
+| Papel | Onde | Comando |
+|---|---|---|
+| servidor | sua máquina | `python3 servidor.py` |
+| ana | sua máquina | `python3 cliente.py --nick ana --servidor 192.168.0.6` |
+| bruno | máquina do colega 1 | `python cliente.py --nick bruno --servidor 192.168.0.6` |
+| carla | máquina do colega 2 | `python cliente.py --nick carla --servidor 192.168.0.6` |
 
-1. `ana`: `/p2p bruno` → "conectado a bruno (127.0.0.1:porta)".
-2. Trocar duas mensagens nos dois sentidos (mostrar que o `prompt` passa a ser `ana[bruno]>`).
-3. **A prova**: no terminal extra, `ss -tunap | grep <porta do bruno>`.
-   > "Olha a conexão ESTAB ligando a porta de um cliente à porta do outro, sem passar pelo servidor.
-   > É por isso que o log do servidor, aqui ao lado, não tem nenhuma linha de mensagem."
-4. Em `carla`: `/p2p bruno` → "bruno está em outra conversa" (`OCUPADO`).
-   > "Uma conversa por vez: se o servidor não intermedeia, quem controla a ocupação é o próprio par."
-5. `ana`: `/sair` → encerra só a conversa, o cliente continua no ar.
+Se só houver uma máquina: `./demo.sh` (servidor + 3 clientes em janelas tmux, `Ctrl+b 0..3`).
 
-## 3. Grupo — R6, R7 (2 min)
+---
+
+## 1. Abertura — 40 s
+
+> "É um chat no estilo WhatsApp, feito só com a biblioteca padrão do Python: três arquivos.
+> Um servidor na porta 9990 e três clientes. **A conversa de duas pessoas é TCP, ligando um cliente
+> direto no outro** — o servidor só apresenta os endereços. **A conversa de grupo é UDP, passando pelo
+> servidor**, que reenvia para todos. É a mesma troca de mensagens do enunciado, com os dois
+> protocolos no mesmo app — e sem nenhuma biblioteca de rede."
+
+Mostrar: a árvore do projeto (`servidor.py`, `cliente.py`, `protocolo.py`, `docs/`) e a janela do
+servidor já com os três `REG` no log.
+
+## 2. Tecnologias — 2 min (aqui está a nota)
+
+Falar em **decisões**, não em lista de bibliotecas.
+
+| Tecnologia | O que dizer em uma frase |
+|---|---|
+| `socket` padrão (stdlib) | "Só `socket`, `threading`, `queue` e `argparse`. Nenhum `pip install` — exigência do enunciado." |
+| **Protocolo de texto por linhas** | "Cada mensagem é uma linha UTF-8 terminada em `\n`: comando + argumentos, e o último campo consome o resto — por isso o texto pode ter espaços. Dá para ver o protocolo acontecendo com `nc`." |
+| **Enquadramento com buffer** | "`recv(1024)` **não** é uma mensagem: TCP é fluxo, pode chegar meia linha ou três coladas. O `LeitorLinhas` acumula bytes e só entrega linha inteira. Os exemplos de sala de aula tratam o retorno como mensagem e quebram com texto longo." |
+| **TCP no ponto a ponto** | "Conversa de dois precisa de ordem e entrega garantida, e a conexão já identifica o par." |
+| **UDP no grupo** | "Um envio alcança N destinos sem N conexões. O preço é perder datagrama — então cada mensagem leva `seq` e o receptor avisa a lacuna." |
+| **Threads + um `Lock`** | "Uma thread por conexão e a lista de contatos protegida por lock. **Não usei `fork`** porque no fork cada processo fica com uma *cópia* da lista — a lista compartilhada não existiria; `select` travaria todo mundo num envio lento; `asyncio` mudaria o modelo que a disciplina ensina." |
+| **Sessão de controle persistente** | "A conexão TCP com o servidor fica aberta: `EOF` quer dizer 'saiu', sem heartbeat e sem contato fantasma." |
+| **Identidade não se declara** | "O IP vem de `getpeername()`; no grupo o servidor confere se o `(ip, porta)` de origem é o endpoint registrado."
+
+Se pedirem "por que não JSON": "Poderia, é stdlib — mas esconderia justamente o enquadramento, que é o
+que a disciplina avalia. Com texto por linha o protocolo é visível na tela."
+
+## 3. Registro, lista e presença — 1 min 30 s
+
+1. No servidor: as linhas `REG ana ...`, `REG bruno ...`, `REG carla ...`.
+2. `ana`: `/listar`.
+
+> "O servidor guarda nick, IP e porta. Repare no `--servidor` real: o IP é o da máquina, e não foi o
+> cliente que disse — veio do `getpeername()`. O cliente só declara a **porta onde escuta**."
+
+3. No **bruno**, abrir o cliente agora (ou já estar aberto): a janela da `ana` mostra
+   `[+] bruno entrou` sem ela pedir nada.
+
+> "Isso é a sessão persistente: o servidor empurra o evento. E se o bruno fechar, a ana recebe
+> `[-] bruno saiu` na hora — presença exata, não timeout."
+
+## 4. Ponto a ponto — 2 min 30 s (a prova principal)
+
+1. `ana`: `/p2p bruno` → `[p2p] conectado a bruno (192.168.0.x:porta)`.
+2. No bruno: `[p2p] ana conectou (192.168.0.y:porta)`.
+3. Trocar duas mensagens nos dois sentidos (o prompt fica `ana[bruno]>`).
+4. **A prova**: apontar para a janela do servidor — **nenhuma linha nova**.
+
+> "As mensagens não passaram pelo servidor. O servidor viu só o `REG` e o `LIST`; o texto foi direto
+> de uma máquina para a outra. Se eu rodar `ss -tunap` na máquina do bruno, aparece uma conexão
+> `ESTAB` ligando a minha porta à dele."
+
+5. `carla`: `/p2p bruno` → `bruno está em outra conversa`.
+
+> "Ocupação é controlada pelo próprio par: o servidor não intermedeia, então quem sabe se está em
+> conversa é quem recebe a conexão. A recusa é uma linha do protocolo (`OCUPADO`), não um erro."
+
+6. `ana`: `/sair` → encerra **só** a conversa; o cliente continua no ar.
+
+## 5. Grupo — 2 min
 
 1. `ana`: `/grupo reuniao 19h na sala 12`.
-   > "Um envio. O servidor reenviou para os três — está no log dele: `-> 3 destinatario(s)`."
-2. Confirmar que `bruno` e `carla` receberam com o prefixo `[grupo ana]`.
-3. `carla`: `/grupo ok, levo o notebook` → aparece nos outros dois.
-4. Explicar a escolha: **um datagrama alcança N destinos** sem N conexões; o custo é que UDP pode
-   perder — por isso cada mensagem leva `seq` por remetente e o cliente avisa
-   "(UDP) N mensagem(ns) perdida(s)" quando o número pula.
-5. Se sobrar tempo: `ss -ulnp` mostrando o UDP 9990 e os sockets UDP dos clientes.
+2. Mostrar nos outros dois: `[grupo ana] reuniao 19h na sala 12`.
+3. No servidor: `BC de ana ... -> 3 destinatario(s)`.
 
-## 4. Robustez (1 min)
+> "Um envio, três recebimentos. Esse é o motivo do UDP aqui: o remetente não precisa conhecer nem
+> manter três conexões. O servidor valida que o datagrama veio do endpoint registrado da ana —
+> sem isso, qualquer processo publicaria como qualquer pessoa."
 
-| Provar | Como |
-|---|---|
-| nick repetido não entra | abrir `python3 cliente.py --nick ana` → "já está em uso", sessão viva |
-| cliente cai sem avisar | `kill -9` numa janela de cliente → os outros mostram `[-] nome saiu` |
-| entrada inválida | `/p2p fantasma` → `contato_offline`; `/foo` → "comando desconhecido" |
+4. `carla`: `/grupo ok, levo o notebook` → chega nos outros dois.
+5. Se quiser provocar: "se um datagrama se perder, o cliente mostra `(UDP) N mensagem(ns) perdida(s)`
+   — o `seq` está ali para isso: a perda é visível, não silenciosa."
 
-> "Erro é protocolo, não exceção: nenhum traceback aparece na tela em nenhum desses casos."
+## 6. Robustez — 1 min
 
-## 5. Fechamento (1 min)
+| Provar | Como | O que aparece |
+|---|---|---|
+| nick repetido | outro `cliente.py --nick ana` | `nick 'ana' já está em uso` e a sessão continua viva |
+| queda abrupta | `kill -9` na janela do carla | `[-] carla saiu` nos outros |
+| entrada inválida | `/p2p fantasma`, `/foo` | `contato_offline`, `comando desconhecido` |
 
-1. Rodar `python3 testes/teste_protocolo.py` (14 testes) e `teste_cliente.py` (10) — tudo verde.
-   > "As duas suítes sobem servidor e clientes de verdade, em portas livres; cada critério do
-   > enunciado tem um teste nomeado."
-2. Mostrar `docs/evidencias/` — logs capturados de execução real, e a checagem R1–R11.
-3. Fechar pelas decisões:
-   > "Três decisões explicam o código: enquadramento em linhas (`recv` não é mensagem), threads com
-   > um lock (com `fork` a lista de contatos seria copiada por processo) e sessão persistente
-   > (presença exata). Os ADRs estão em `docs/adr/`."
+> "Erro é protocolo, não exceção: nenhum traceback na tela em nenhum desses casos. Um traceback numa
+> apresentação é falha de projeto, não de digitação."
+
+## 7. Fechamento — 1 min
+
+1. Rodar as suítes: `python3 testes/teste_protocolo.py` (**16**) e `teste_cliente.py` (**11**).
+
+> "As duas suítes sobem servidor e clientes de verdade, em portas sorteadas, e cada critério do
+> enunciado tem um teste nomeado: registro, nick duplicado, lista, P2P direto, grupo, spoof, linha
+> longa, queda abrupta."
+
+2. Mostrar `docs/evidencias/` (`04-sockets.log` tem o `ss` provando os dois transportes).
+
+3. Fechar com as três decisões:
+
+> "Três decisões explicam o código: enquadramento em linhas, porque `recv` não é mensagem; threads
+> com um lock, porque com `fork` a lista de contatos seria copiada; e sessão persistente, porque o
+> enunciado exige que só converse quem está conectado. Os ADRs estão em `docs/adr/`."
+
+Frase de encerramento (se o professor puxar "por que isso não é o WhatsApp"): **"o app é fácil; o
+produto é o estado que sobrevive à sessão"** — histórico, entrega offline, identidade e NAT, coisas
+que este trabalho deixou de fora de propósito.
+
+---
+
+## Perguntas prováveis (respostas de 20 s)
+
+**"Por que TCP no P2P e UDP no grupo?"**
+Conversa de dois: cada linha precisa chegar inteira e em ordem, e a conexão já diz quem é o par.
+Grupo: um envio para N destinos sem N conexões — e a perda do UDP é declarada, com `seq`.
+
+**"Como você garante que a mensagem chegou inteira?"**
+No TCP, o enquadramento: o leitor acumula bytes até o `\n`. O tamanho máximo é 1024 bytes, e o que
+passa é cortado pelo remetente com marca `…`.
+
+**"Por que não `fork`, que foi o que vimos em aula?"**
+Porque a lista de contatos precisa ser a mesma para todos. No `fork`, cada filho recebe uma cópia:
+o registro de um cliente ficaria invisível para os outros. Precisaria de memória compartilhada ou
+fila entre processos.
+
+**"Onde está a concorrência?"**
+No servidor: uma thread por sessão de controle, uma thread para o socket UDP do grupo, e um lock
+protegendo a lista. No cliente: quatro fontes de evento (prompt, controle, UDP, listener do P2P).
+
+**"E se dois clientes tiverem o mesmo nick?"**
+O segundo recebe `ERR 409 nick_em_uso` e pode tentar outro nick na mesma sessão. A comparação é
+case-insensitive.
+
+**"Como sabe quem está online?"**
+Sessão persistente: contato existe enquanto o socket existe. Fechou, recebeu `EOF`, o servidor
+remove e avisa os demais com `EVENTO SAIU`.
+
+**"Como impede alguém de se passar por outro?"**
+O IP vem do `getpeername()`, e no grupo o servidor confere o `(ip, porta)` de origem contra o
+registrado. Nas conversas P2P o receptor confere o IP de quem conectou (`ERR 403 origem_invalida`).
+Não é autenticação forte — está declarado como limitação.
+
+**"Funciona em máquinas diferentes?"**
+Sim, e é assim que estou demonstrando: cada cliente anuncia a própria porta, o servidor registra o IP
+real, e o P2P conecta direto na máquina do colega. Precisa de firewall liberado para a porta de
+entrada.
+
+**"O que acontece se o servidor cair?"**
+Os clientes mostram `[!] sessão com o servidor <ip>:<porta> encerrada` e não quebram. Não há
+reconexão automática: está fora do escopo, e o enunciado pede operação síncrona.
+
+**"Quantas linhas de código?"**
+1.016 linhas nos três arquivos (860 sem comentários e linhas em branco), mais as duas suítes
+com 27 testes.
 
 ## Se algo falhar na hora
 
 | Sintoma | Ação |
 |---|---|
-| "porta 9990 indisponível" | `ss -ltnup 'sport = :9990'`; rodar `./demo.sh --porta 9991` e clientes com `--porta-servidor 9991` |
-| outro computador não conecta | usar o IP marcado **rede local** no banner do servidor (não o da VPN); liberar `9990/tcp` e `9990/udp` no firewalld; testar com `nc -vz <ip> 9990` |
-| conecta mas o P2P não abre | porta do cliente barrada: rodar os clientes com `--porta 5001`/`5002` e liberar `5001-5099/tcp` na máquina que recebe |
-| cliente não vê os outros | ele precisa ter recebido `EVENTO ENTROU` ou rodado `/listar`; a lista é pedida no registro |
-| P2P recusa com `404` | o destino não está na lista **deste** cliente: `/listar` e tentar de novo |
-| nada aparece no terminal | `python3 -u` ou conferir se está na janela certa do tmux (`Ctrl+b` + número) |
-
-Rede de segurança: as evidências gravadas em `docs/evidencias/` mostram os quatro fluxos; e as
-suítes rodam em 25 s se for preciso demonstrar sem digitar.
-
-## Antes de entrar na sala (checklist de 5 minutos)
-
-```bash
-cd ~/Documentos/ifrs/redes/av3-sockets-chat
-git pull                                    # o repo precisa estar atualizado
-ss -ltnp 'sport = :9990'                    # nada ocupando a porta
-./scripts/empacotar-cliente.sh               # zip para os colegas (se for usar outra máquina)
-python3 servidor.py                          # anote o IP marcado "rede local"
-python3 cliente.py --nick teste              # em outro terminal, confirme que registra
-python3 testes/teste_protocolo.py | tail -1  # 16/16
-python3 testes/teste_cliente.py | tail -1    # 11/11
-```
-
-Se um colega for entrar pela rede: `nc -vz <ip> 9990` da máquina dele antes da aula, e a máquina
-que **recebe** P2P precisa liberar a porta de escuta (no Windows, aceitar o aviso do firewall).
-
-Regra de ouro: **todos os clientes com o mesmo `--servidor`** — mesma máquina usa `127.0.0.1`,
-máquinas diferentes usam o IP da rede local. Misturar dá `403 origem_invalida`.
+| "porta 9990 indisponível" | `ss -ltnp 'sport = :9990'`; rodar tudo com `--porta 9991` |
+| colega não conecta | `nc -vz <ip> 9990` na máquina dele; firewall ou IP da VPN no lugar do IP local |
+| conecta mas `/p2p` não abre | firewall da máquina que **recebe**: usar `--porta 5001`/`5002` e liberar a faixa |
+| `/p2p` dá `403 origem_invalida` | os clientes estão entrando por endereços diferentes: todos com o mesmo `--servidor` |
+| `/p2p` dá `404` | o destino não está na lista *daquele* cliente: `/listar` e tentar de novo |
+| nada aparece na tela | `python3 -u` (sem buffer) ou conferir a janela certa do tmux (`Ctrl+b` + número) |
+| tudo falhou | `docs/evidencias/` tem os quatro fluxos gravados; as suítes rodam em 25 s |

@@ -1,0 +1,130 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>COLA — Sockets Chat (Av3)</title><style>
+body { font-family: 'Liberation Serif', 'DejaVu Serif', serif; font-size: 10.5pt; line-height: 1.35; color: #111; }
+h1 { font-family: 'Liberation Sans', sans-serif; font-size: 17pt; }
+h2 { font-family: 'Liberation Sans', sans-serif; font-size: 13pt; margin-top: 16pt; page-break-after: avoid; }
+h3 { font-family: 'Liberation Sans', sans-serif; font-size: 11pt; margin-top: 12pt; page-break-after: avoid; }
+table { font-family: 'Liberation Sans', sans-serif; font-size: 8pt; border-collapse: collapse; }
+td, th { border: 0.6pt solid #666; padding: 3pt 4pt; vertical-align: top; }
+tr { page-break-inside: avoid; }
+p { orphans: 2; widows: 2; }
+code { font-family: 'Liberation Mono', monospace; font-size: 8.5pt; }
+pre { background: #f5f5f5; padding: 6pt; font-size: 8.5pt; }
+blockquote { margin-left: 0; padding-left: 10pt; color: #333; }
+</style></head><body><h1>COLA — Sockets Chat (Av3)</h1>
+<p><em>Imprimir frente e verso: a frente é o que falar e mostrar; o verso são as perguntas prováveis e o
+plano B.</em></p>
+<h2>Ordem da apresentação</h2>
+<div><table border="1" cellspacing="0" cellpadding="4" width="100%"><colgroup><col style="width:12%"><col style="width:19%"><col style="width:12%"><col style="width:57%"></colgroup>
+<thead>
+<tr>
+<th bgcolor="#e8e8e8">✔</th>
+<th bgcolor="#e8e8e8">Bloco</th>
+<th bgcolor="#e8e8e8">Tempo</th>
+<th bgcolor="#e8e8e8">O que mostrar / dizer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>☐</td>
+<td>Abertura</td>
+<td>40 s</td>
+<td>"3 arquivos, só stdlib. P2P em TCP direto; grupo em UDP pelo servidor."</td>
+</tr>
+<tr>
+<td>☐</td>
+<td>Tecnologias</td>
+<td>2 min</td>
+<td>protocolo de linhas · buffer (<code>recv</code> não é mensagem) · threads + lock (<code>fork</code> copiaria a lista) · sessão persistente · <code>getpeername</code></td>
+</tr>
+<tr>
+<td>☐</td>
+<td>Registro</td>
+<td>1:30</td>
+<td>servidor mostra <code>REG ...</code>; ana <code>/listar</code>; bruno entra → <code>[+] bruno entrou</code></td>
+</tr>
+<tr>
+<td>☐</td>
+<td>P2P</td>
+<td>2:30</td>
+<td>ana <code>/p2p bruno</code>; 2 mensagens; <strong>log do servidor vazio</strong>; carla <code>/p2p bruno</code> → ocupado; ana <code>/sair</code></td>
+</tr>
+<tr>
+<td>☐</td>
+<td>Grupo</td>
+<td>2 min</td>
+<td>ana <code>/grupo ...</code>; 3 telas recebem; servidor <code>-&gt; 3 destinatario(s)</code></td>
+</tr>
+<tr>
+<td>☐</td>
+<td>Robustez</td>
+<td>1 min</td>
+<td>nick repetido · <code>kill -9</code> → <code>[-] carla saiu</code> · <code>/p2p fantasma</code></td>
+</tr>
+<tr>
+<td>☐</td>
+<td>Fechamento</td>
+<td>1 min</td>
+<td>suítes <strong>16 + 11</strong> · <code>docs/evidencias/</code> · 3 decisões</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Antes de entrar (5 min)</h2>
+<pre><code class="language-bash">git pull &amp;&amp; ss -ltnp 'sport = :9990'        # porta livre
+python3 servidor.py                          # ANOTAR o IP &quot;rede local&quot;
+python3 cliente.py --nick ana --servidor &lt;IP&gt;
+# nas máquinas dos colegas:  nc -vz &lt;IP&gt; 9990   (antes da aula!)
+</code></pre>
+<p>Todos com o <strong>mesmo</strong> <code>--servidor</code>: mesma máquina → <code>127.0.0.1</code>; máquinas diferentes → IP local.</p>
+<h2>Seis frases que valem a nota</h2>
+<ol>
+<li>"<code>recv</code> não é mensagem: TCP é fluxo — o leitor acumula bytes até o <code>\n</code>."</li>
+<li>"<code>fork</code> copia a lista de contatos em cada processo; por isso threads com um único lock."</li>
+<li>"O log do servidor está vazio durante a conversa: as mensagens foram de máquina para máquina."</li>
+<li>"Um envio, três recebimentos: é o motivo do UDP no grupo."</li>
+<li>"O IP não é declarado pelo cliente, vem do <code>getpeername()</code>; o grupo confere o endpoint de origem."</li>
+<li>"Erro é protocolo, não exceção: nenhum traceback em nenhum caso."</li>
+</ol>
+<h2>Números para não gaguejar</h2>
+<p><strong>9990</strong> TCP (controle/P2P) e <strong>9990</strong> UDP (grupo) · <strong>4</strong> portas por cliente (escuta, controle, grupo =
+escuta, P2P de saída) · <strong>1024</strong> bytes por linha · <strong>1016</strong> linhas em 3 arquivos (860 sem comentários) ·
+<strong>27</strong> testes (16 + 11) · <strong>4</strong> ADRs.</p>
+<h2>Três perguntas e a resposta de 20 s</h2>
+<ul>
+<li><strong>"Por que não <code>fork</code>?"</strong> — a lista de contatos precisa ser a mesma para todos; no fork cada filho
+  tem uma cópia e o registro de um cliente seria invisível para os outros.</li>
+<li><strong>"Por que UDP no grupo?"</strong> — um envio alcança N destinos sem N conexões; a perda existe e é
+  declarada pelo <code>seq</code>, que avisa a lacuna.</li>
+<li><strong>"Funciona entre máquinas?"</strong> — sim, é o que estou demonstrando: cada cliente anuncia a própria
+  porta, o servidor registra o IP real e o P2P conecta direto.</li>
+</ul>
+<h2>Se travar</h2>
+<div><table border="1" cellspacing="0" cellpadding="4" width="100%"><colgroup><col style="width:34%"><col style="width:66%"></colgroup>
+<thead>
+<tr>
+<th bgcolor="#e8e8e8">Sintoma</th>
+<th bgcolor="#e8e8e8">O que fazer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>403 origem_invalida</code></td>
+<td>clientes com <code>--servidor</code> diferentes — usar o mesmo em todos</td>
+</tr>
+<tr>
+<td><code>404 contato</code></td>
+<td>não está na lista daquele cliente: <code>/listar</code> e repetir</td>
+</tr>
+<tr>
+<td>9990 ocupada</td>
+<td><code>ss -ltnp 'sport = :9990'</code>; rodar tudo com <code>--porta 9991</code></td>
+</tr>
+<tr>
+<td>P2P não abre</td>
+<td>firewall da máquina que <strong>recebe</strong> (<code>--porta 5001</code> + liberar a faixa)</td>
+</tr>
+<tr>
+<td>tudo falhou</td>
+<td><code>docs/evidencias/</code> tem os 4 fluxos gravados; suítes em 25 s</td>
+</tr>
+</tbody>
+</table></div></body></html>

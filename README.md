@@ -148,7 +148,8 @@ demo.sh          servidor + 3 clientes em tmux
 | [`docs/ESPECIFICACAO.md`](docs/ESPECIFICACAO.md) | requisitos do enunciado (R1–R11), escopo, riscos, como cada item é provado |
 | [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md) | processos, sockets, threads, fluxos, máquina de estados |
 | [`docs/PROTOCOLO.md`](docs/PROTOCOLO.md) | contrato de fio: comandos, respostas, erros, limites |
-| [`docs/ROTEIRO-APRESENTACAO.md`](docs/ROTEIRO-APRESENTACAO.md) | roteiro de 10 minutos para a apresentação |
+| [`docs/ROTEIRO-APRESENTACAO.md`](docs/ROTEIRO-APRESENTACAO.md) | guia de apresentação: falas, ordem da demo, tecnologias, perguntas prováveis |
+| [`docs/COLA-APRESENTACAO.md`](docs/COLA-APRESENTACAO.md) · [PDF](docs/COLA-APRESENTACAO.pdf) | cola de frente-e-verso para imprimir e levar para a banca |
 | [`docs/BACKLOG.md`](docs/BACKLOG.md) | incrementos e critério de aceite de cada um |
 | [`docs/adr/`](docs/adr/) | decisões com alternativas e trade-offs |
 | [`docs/evidencias/`](docs/evidencias/) | logs reais + checagem item a item do enunciado |
